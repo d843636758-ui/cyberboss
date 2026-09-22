@@ -16,7 +16,9 @@ mode="${CYBERBOSS_BOOT_MODE:-run}"
 case "$mode" in
   codex-login)
     echo "[cyberboss] Starting Codex device login. Open the URL from these logs and enter the displayed code."
-    exec codex login --device-auth
+    export NO_COLOR=1
+    export TERM=dumb
+    exec sh -c 'codex login --device-auth 2>&1 | sed -u "s/^/[codex] /"'
     ;;
   weixin-login|wechat-login|login)
     echo "[cyberboss] Starting WeChat QR login. Save the QR/link from these logs and scan it in WeChat."
@@ -45,4 +47,3 @@ case "$mode" in
     exit 2
     ;;
 esac
-
