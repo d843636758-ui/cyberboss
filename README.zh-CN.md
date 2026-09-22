@@ -479,6 +479,11 @@ ${HOME}/.cyberboss
 <a id="faq"></a>
 ## FAQ
 
+### 可以部署到 Zeabur 吗？
+
+可以。本仓库包含 Dockerfile 和适用于 Zeabur 的分阶段登录入口。请按照 [Zeabur 部署指南](./docs/zeabur-deployment.zh-CN.md) 配置 `/data` 持久卷、Codex 登录、微信扫码与用户白名单。
+
+
 ### 为什么不是直接 `npm install cyberboss`？
 
 因为当前没有发布 npm package。正确方式是 `git clone` 仓库后，在项目目录里执行 `npm install`。
