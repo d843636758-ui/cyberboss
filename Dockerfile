@@ -10,12 +10,16 @@ ENV NODE_ENV=production \
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl git \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install --global @openai/codex@latest
+    && npm install --global @openai/codex@latest \
+    && npm cache clean --force \
+    && rm -rf /root/.cache /tmp/*
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev \
+    && npm cache clean --force \
+    && rm -rf /root/.cache /tmp/*
 
 COPY . .
 RUN chmod +x /app/scripts/zeabur-entrypoint.sh
@@ -23,4 +27,3 @@ RUN chmod +x /app/scripts/zeabur-entrypoint.sh
 VOLUME ["/data"]
 
 ENTRYPOINT ["/app/scripts/zeabur-entrypoint.sh"]
-
