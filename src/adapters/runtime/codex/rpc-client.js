@@ -11,6 +11,7 @@ const CODEX_CLIENT_INFO = {
   title: "Cyberboss Agent",
   version: "0.1.0",
 };
+const DEFAULT_REQUEST_TIMEOUT_MS = 60_000;
 
 class CodexRpcClient {
   constructor({ endpoint = "", env = process.env, codexCommand = "", extraWritableRoots = [], mcpServerConfig = null }) {
@@ -234,7 +235,11 @@ class CodexRpcClient {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const payload = JSON.stringify({ id, method, params });
     const responsePromise = new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`Codex RPC request timed out: ${method}`));
+      }, DEFAULT_REQUEST_TIMEOUT_MS);
+      this.pending.set(id, { resolve, reject, timer, method });
     });
     this.sendRaw(payload);
     return responsePromise;
@@ -274,8 +279,9 @@ class CodexRpcClient {
     }
 
     if (parsed && parsed.id != null && this.pending.has(String(parsed.id))) {
-      const { resolve, reject } = this.pending.get(String(parsed.id));
+      const { resolve, reject, timer } = this.pending.get(String(parsed.id));
       this.pending.delete(String(parsed.id));
+      clearTimeout(timer);
       if (parsed.error) {
         reject(new Error(parsed.error.message || "Codex RPC request failed"));
         return;

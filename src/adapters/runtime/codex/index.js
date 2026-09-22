@@ -65,6 +65,13 @@ function createCodexRuntimeAdapter(config) {
       const runtimeClient = ensureClient();
       return runtimeClient.onMessage((message) => {
         const event = mapCodexMessageToRuntimeEvent(message);
+        const method = normalizeText(message?.method);
+        if (method && (/^(turn|item)\//.test(method) || method.includes("approval"))) {
+          const params = message?.params || {};
+          const threadId = extractThreadIdFromParams(params) || "(none)";
+          const turnId = extractTurnIdFromParams(params) || "(none)";
+          console.log(`[cyberboss] codex event method=${method} mapped=${event ? "yes" : "no"} thread=${threadId} turn=${turnId}`);
+        }
         if (event) {
           listener(event, message);
         }
@@ -245,6 +252,7 @@ function createCodexRuntimeAdapter(config) {
         modelProvider: desiredModelProvider,
         workspaceRoot,
       });
+      console.log(`[cyberboss] codex turn accepted thread=${threadId} turn=${extractTurnId(response) || "(unknown)"}`);
       return {
         threadId,
         turnId: extractTurnId(response),

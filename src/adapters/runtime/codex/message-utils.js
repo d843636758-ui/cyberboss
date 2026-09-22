@@ -1,5 +1,9 @@
 function extractThreadId(response) {
-  return response?.result?.thread?.id || null;
+  return normalizeIdentifier(
+    response?.result?.thread?.id
+    || response?.result?.threadId
+    || response?.result?.thread_id
+  ) || null;
 }
 
 function extractTurnId(response) {
@@ -12,11 +16,19 @@ function extractTurnId(response) {
 }
 
 function extractThreadIdFromParams(params) {
-  return normalizeIdentifier(params?.threadId);
+  return normalizeIdentifier(
+    params?.threadId
+    || params?.thread_id
+    || params?.thread?.id
+  );
 }
 
 function extractTurnIdFromParams(params) {
-  return normalizeIdentifier(params?.turnId || params?.turn?.id);
+  return normalizeIdentifier(
+    params?.turnId
+    || params?.turn_id
+    || params?.turn?.id
+  );
 }
 
 function isAssistantItemCompleted(message) {
