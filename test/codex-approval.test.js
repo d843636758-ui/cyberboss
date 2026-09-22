@@ -3,7 +3,10 @@ const assert = require("node:assert/strict");
 
 const { CyberbossApp } = require("../src/core/app");
 const { mapCodexMessageToRuntimeEvent } = require("../src/adapters/runtime/codex/events");
-const { buildCodexMcpConfigArgs } = require("../src/adapters/runtime/codex/mcp-config");
+const {
+  buildCodexMcpConfigArgs,
+  buildObMcpConfigArgs,
+} = require("../src/adapters/runtime/codex/mcp-config");
 
 test("codex MCP config auto-approves cyberboss tools", () => {
   const args = buildCodexMcpConfigArgs({
@@ -34,6 +37,26 @@ test("codex MCP config auto-approves cyberboss tools", () => {
     args.join("\n"),
     /mcp_servers\.cyberboss_tools\.tools\.whereabouts_snapshot\.approval_mode="auto"/
   );
+});
+
+test("codex MCP config embeds only the explicitly configured OB remote", () => {
+  const args = buildObMcpConfigArgs({
+    CYBERBOSS_OB_MCP_URL: "https://ob.example.test/mcp/owner-secret",
+    CYBERBOSS_OB_BEARER_TOKEN: "secret-from-zeabur",
+  });
+
+  assert.deepEqual(args, [
+    "-c",
+    "mcp_servers.ob.url=\"https://ob.example.test/mcp/owner-secret\"",
+    "-c",
+    "mcp_servers.ob.required=true",
+    "-c",
+    "mcp_servers.ob.tool_timeout_sec=120",
+    "-c",
+    "mcp_servers.ob.default_tools_approval_mode=\"auto\"",
+    "-c",
+    "mcp_servers.ob.bearer_token_env_var=\"CYBERBOSS_OB_BEARER_TOKEN\"",
+  ]);
 });
 
 test("codex MCP elicitation approvals map to runtime approval events", () => {
